@@ -1,0 +1,44 @@
+version: '3.3'
+services:
+
+    app:
+        image: "gitea/gitea:latest"
+        restart: unless-stopped
+        depends_on:
+            - db
+        networks:
+            - net
+        ports:
+            - "4100:3000"
+            - "4122:22"
+        volumes:
+            - "gitea-data:/data"
+        environment:
+            - "RUN_CROND=true"
+
+    db:
+        image: "postgres:latest"
+        restart: unless-stopped
+        networks:
+            net:
+                aliases:
+                    - postgres
+        volumes:
+            - "db-data:/var/lib/postgresql/data"
+        environment:
+            - "POSTGRES_USER=gitea"
+            - "POSTGRES_DB=gitea"
+            - POSTGRES_PASSWORD
+        secrets:
+            - POSTGRES_PASSWORD
+
+networks:
+    net:
+
+volumes:
+    gitea-data:
+    db-data:
+
+secrets:
+    POSTGRES_PASSWORD:
+        file: ./secret-postgres-password.txt
